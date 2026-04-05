@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saumon Fumé de Pâques 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --salmon: #E8785A;
+    --salmon-dark: #C4573A;
+    --salmon-light: #FAE8E3;
+    --cream: #FDF8F4;
+    --dark: #2A1F1A;
+    --mid: #6B4E3D;
+    --border: #E8D5CB;
+    --green: #3A6B4E;
+    --green-light: #EAF3EE;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--dark);
+    color: white;
+    text-align: center;
+    padding: 3rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 30px,
+      rgba(232,120,90,0.06) 30px, rgba(232,120,90,0.06) 60px
+    );
+  }
+
+  header .badge {
+    display: inline-block;
+    background: var(--salmon);
+    color: white;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    position: relative;
+    margin-bottom: 0.6rem;
+  }
+
+  header p {
+    font-weight: 300;
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.65);
+    position: relative;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 600px) {
+    .products-grid { grid-template-columns: 1fr; }
+  }
+
+  .product-card {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1rem;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .product-card:hover {
+    border-color: var(--salmon);
+  }
+
+  .product-card.has-qty {
+    border-color: var(--salmon);
+    background: var(--salmon-light);
+  }
+
+  .product-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.7rem;
+    display: block;
+  }
+
+  .product-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.2rem;
+  }
+
+  .product-weight {
+    font-size: 0.8rem;
+    color: var(--mid);
+    margin-bottom: 0.3rem;
+    font-weight: 300;
+  }
+
+  .product-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--salmon-dark);
+    margin-bottom: 1rem;
+  }
+
+  .qty-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .qty-btn {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--salmon);
+    background: white;
+    color: var(--salmon-dark);
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .qty-btn:hover { background: var(--salmon); color: white; }
+
+  .qty-display {
+    font-size: 1.2rem;
+    font-weight: 700;
+    min-width: 28px;
+    text-align: center;
+    color: var(--dark);
+  }
+
+  .total-banner {
+    background: var(--dark);
+    color: white;
+    border-radius: 10px;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .total-banner .label { font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+  .total-banner .amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--salmon);
+  }
+
+  .total-detail {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 2px;
+  }
+
+  .form-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  @media (max-width: 500px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  .form-row.full { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--mid);
+  }
+
+  input, textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    font-family: 'Lato', sans-serif;
+    color: var(--dark);
+    background: var(--cream);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--salmon);
+    background: white;
+  }
+
+  input.error { border-color: #E24B4A; }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--salmon);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 1rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    text-transform: uppercase;
+  }
+
+  .submit-btn:hover { background: var(--salmon-dark); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .notice {
+    font-size: 0.82rem;
+    color: var(--mid);
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.5;
+  }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .success-icon {
+    width: 72px; height: 72px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+
+  .success-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .success-screen p { color: var(--mid); margin-bottom: 0.4rem; line-height: 1.6; }
+
+  .success-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 0.7rem 1.5rem;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Lato', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-pdf {
+    background: var(--salmon);
+    color: white;
+    border: none;
+  }
+
+  .btn-pdf:hover { background: var(--salmon-dark); }
+
+  .btn-excel {
+    background: white;
+    color: var(--green);
+    border: 2px solid var(--green);
+  }
+
+  .btn-excel:hover { background: var(--green-light); }
+
+  .btn-new {
+    background: white;
+    color: var(--mid);
+    border: 2px solid var(--border);
+  }
+
+  .btn-new:hover { border-color: var(--mid); }
+
+  .order-summary {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin: 1.5rem 0;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  .order-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.9rem;
+  }
+
+  .order-line.total {
+    border-top: 1px solid var(--border);
+    margin-top: 6px;
+    padding-top: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--salmon-dark);
+  }
+
+  .emailjs-info {
+    background: #FFF8E1;
+    border: 1px solid #FFE082;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: #5D4037;
+  }
+
+  .emailjs-info strong { display: block; margin-bottom: 4px; }
+
+  .admin-section {
+    background: white;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .admin-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--mid);
+  }
+
+  .admin-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--mid);
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  .admin-btn:hover { border-color: var(--salmon); color: var(--salmon-dark); }
+
+  .admin-btn-close {
+    border-color: #C0392B;
+    color: #C0392B;
+  }
+  .admin-btn-close:hover { border-color: #922B21; color: #922B21; background: #FDEDEC; }
+  .admin-btn-open {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .admin-btn-open:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">École Steiner Lausanne</div>
+  <h1>Saumon Fumé<br><em style="font-weight:400;font-style:italic;">d'Exception</em></h1>
+  <p style="max-width:640px;margin:1rem auto 0;font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.72);">
+    Le saumon d'Irlande <em>Salmo Salar</em> que nous vous proposons à Noël et à Pâques, est d'une qualité supérieure. Il est pêché en mer dans des eaux encore non polluées et a une faible teneur en graisse. Il est importé frais, directement en Suisse, par la famille O'Connell qui depuis plusieurs générations s'est spécialisée dans la pêche et le fumage du saumon. Pour la conservation, le fumage de manière traditionnelle est employé. Le temps est laissé au poisson pour qu'il s'imprègne de la fumée du bois de chêne brûlé dans le « kiln », offrant une saveur subtile au saumon, tout en respectant son goût authentique.
+  </p>
+</header>
+
+<div class="container">
+
+  <!-- FORM SCREEN -->
+  <div id="form-screen">
+
+    <h2 class="section-title">Votre commande</h2>
+
+    <!-- PRODUCTS -->
+    <div class="products-grid">
+      <div class="product-card" id="card-small">
+        <span style="font-size:2.8rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div class="product-name">Petite</div>
+        <div class="product-weight">500 – 700 g</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('small', -1)">−</button>
+          <span class="qty-display" id="qty-small">0</span>
+          <button class="qty-btn" onclick="changeQty('small', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-medium">
+        <span style="font-size:3.6rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div class="product-name">Moyenne</div>
+        <div class="product-weight">700 – 1000 g</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('medium', -1)">−</button>
+          <span class="qty-display" id="qty-medium">0</span>
+          <button class="qty-btn" onclick="changeQty('medium', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-large">
+        <span style="font-size:4.6rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div class="product-name">Grande</div>
+        <div class="product-weight">1000 – 1500 g</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('large', -1)">−</button>
+          <span class="qty-display" id="qty-large">0</span>
+          <button class="qty-btn" onclick="changeQty('large', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSUMÉ -->
+    <div class="total-banner">
+      <div>
+        <div class="label">Récapitulatif de la commande</div>
+        <div class="total-detail" id="total-detail">Sélectionnez des articles</div>
+      </div>
+      <div class="amount" id="total-display" style="font-size:1.3rem;">0 plaque(s)</div>
+    </div>
+
+    <!-- CONTACT FORM -->
+    <div class="form-section">
+      <h2 class="section-title">Vos coordonnées</h2>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Prénom *</label>
+          <input type="text" id="f-prenom" placeholder="Marie" />
+        </div>
+        <div class="field">
+          <label>Nom *</label>
+          <input type="text" id="f-nom" placeholder="Dupont" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>E-mail *</label>
+          <input type="email" id="f-email" placeholder="marie@exemple.ch" />
+        </div>
+        <div class="field">
+          <label>Téléphone</label>
+          <input type="tel" id="f-tel" placeholder="079 123 45 67" />
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div class="field">
+          <label>Adresse</label>
+          <input type="text" id="f-adresse" placeholder="Rue des Alpes 12" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Code postal</label>
+          <input type="text" id="f-npa" placeholder="1000" />
+        </div>
+        <div class="field">
+          <label>Ville</label>
+          <input type="text" id="f-ville" placeholder="Lausanne" />
+        </div>
+      </div>
+    </div>
+
+    <div id="error-msg" style="color:#E24B4A;font-size:0.9rem;margin-bottom:1rem;display:none;"></div>
+
+    <button class="submit-btn" onclick="submitOrder()">Confirmer ma commande</button>
+    <p class="notice">Vous recevrez une confirmation par e-mail avec le détail de votre commande.</p>
+
+  </div><!-- end form-screen -->
+
+  <!-- SUCCESS SCREEN -->
+  <div id="success-screen" class="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>Commande enregistrée !</h2>
+    <p>Merci <strong id="s-name"></strong>, votre commande a bien été reçue.</p>
+    <p>N° de commande : <strong id="s-invoice" style="color:var(--salmon-dark)"></strong></p>
+
+    <div class="order-summary" id="s-summary"></div>
+
+    <p id="email-status" style="font-size:0.85rem;color:var(--mid);margin-top:0.5rem;">
+      ⏳ Envoi de l'e-mail de confirmation en cours…
+    </p>
+
+    <div class="success-actions">
+      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la facture PDF</button>
+      <button class="action-btn btn-excel" onclick="exportCurrentToExcel()">📊 Exporter Excel</button>
+      <button class="action-btn btn-new" onclick="newOrder()">+ Nouvelle commande</button>
+    </div>
+  </div>
+
+  <!-- CLOSED SCREEN -->
+  <div id="closed-screen" style="display:none;text-align:center;padding:3rem 2rem;">
+    <div style="font-size:3.5rem;margin-bottom:1rem;">🔒</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:0.8rem;">Commandes fermées</h2>
+    <p style="color:var(--mid);line-height:1.6;max-width:420px;margin:0 auto;">
+      Les commandes pour le saumon fumé de Pâques sont actuellement fermées.<br>
+      Merci de votre intérêt, à bientôt !
+    </p>
+  </div>
+
+  <!-- ADMIN SECTION — toujours visible -->
+  <div class="admin-section">
+    <h3>⚙️ Espace administrateur</h3>
+    <button class="admin-btn" onclick="exportAllToExcel()">📊 Exporter toutes les commandes (Excel)</button>
+    <button class="admin-btn" onclick="clearOrders()">🗑️ Vider les commandes locales</button>
+    <br>
+    <button id="toggle-btn" class="admin-btn admin-btn-close" onclick="toggleCommandes()">🔒 Fermer les commandes</button>
+    <p style="font-size:0.8rem;color:#999;margin-top:8px;">Les commandes sont stockées localement dans le navigateur.</p>
+  </div>
+
+</div>
+
+<script>
+emailjs.init('abBulFwuNh5Gbumy0');
+
+function toggleCommandes() {
+  const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
+  const nowOpen = !isOpen;
+  localStorage.setItem('commandes_ouvertes', nowOpen ? 'true' : 'false');
+  applyCommandesState(nowOpen);
+}
+
+function applyCommandesState(isOpen) {
+  const formScreen = document.getElementById('form-screen');
+  const closedScreen = document.getElementById('closed-screen');
+  const successScreen = document.getElementById('success-screen');
+  const btn = document.getElementById('toggle-btn');
+
+  if (isOpen) {
+    closedScreen.style.display = 'none';
+    if (successScreen.style.display !== 'block') formScreen.style.display = 'block';
+    btn.textContent = '🔒 Fermer les commandes';
+    btn.className = 'admin-btn admin-btn-close';
+  } else {
+    formScreen.style.display = 'none';
+    successScreen.style.display = 'none';
+    closedScreen.style.display = 'block';
+    btn.textContent = '🔓 Ouvrir les commandes';
+    btn.className = 'admin-btn admin-btn-open';
+  }
+}
+
+// Init on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
+  applyCommandesState(isOpen);
+});
+
+const PRICES = { small: 30, medium: 50, large: 70 };
+const LABELS = { small: 'Petite (500-700g)', medium: 'Moyenne (700-1000g)', large: 'Grande (1000-1500g)' };
+let qtys = { small: 0, medium: 0, large: 0 };
+let currentOrder = null;
+
+function getOrders() {
+  try { return JSON.parse(localStorage.getItem('saumon_orders') || '[]'); } catch { return []; }
+}
+
+function saveOrder(order) {
+  const orders = getOrders();
+  orders.push(order);
+  localStorage.setItem('saumon_orders', JSON.stringify(orders));
+}
+
+function generateInvoiceNumber() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+  let id = 'SF-';
+  for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
+
+function changeQty(type, delta) {
+  qtys[type] = Math.max(0, qtys[type] + delta);
+  document.getElementById('qty-' + type).textContent = qtys[type];
+  document.getElementById('card-' + type).classList.toggle('has-qty', qtys[type] > 0);
+  updateTotal();
+}
+
+function updateTotal() {
+  const totalQty = qtys.small + qtys.medium + qtys.large;
+  document.getElementById('total-display').textContent = totalQty + ' plaque' + (totalQty > 1 ? 's' : '');
+
+  const parts = [];
+  if (qtys.small > 0) parts.push(qtys.small + ' petite' + (qtys.small > 1 ? 's' : ''));
+  if (qtys.medium > 0) parts.push(qtys.medium + ' moyenne' + (qtys.medium > 1 ? 's' : ''));
+  if (qtys.large > 0) parts.push(qtys.large + ' grande' + (qtys.large > 1 ? 's' : ''));
+
+  document.getElementById('total-detail').textContent =
+    parts.length ? parts.join(', ') : 'Sélectionnez des articles';
+}
+
+function submitOrder() {
+  const errorEl = document.getElementById('error-msg');
+  errorEl.style.display = 'none';
+
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const nom = document.getElementById('f-nom').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  const adresse = document.getElementById('f-adresse').value.trim();
+  const npa = document.getElementById('f-npa').value.trim();
+  const ville = document.getElementById('f-ville').value.trim();
+
+  const total = qtys.small + qtys.medium + qtys.large;
+
+  const errors = [];
+  if (!prenom) errors.push('le prénom');
+  if (!nom) errors.push('le nom');
+  if (!email || !email.includes('@')) errors.push('un e-mail valide');
+  if (total === 0) errors.push('au moins un article');
+
+  if (errors.length) {
+    errorEl.textContent = 'Veuillez saisir : ' + errors.join(', ') + '.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    ' à ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  currentOrder = {
+    date: dateStr,
+    invoice: generateInvoiceNumber(),
+    prenom, nom, email, tel, adresse, npa, ville,
+    small: qtys.small,
+    medium: qtys.medium,
+    large: qtys.large,
+    totalQty: total
+  };
+
+  saveOrder(currentOrder);
+
+  sendConfirmationEmail(currentOrder)
+    .then(() => {
+      document.getElementById('email-status').textContent =
+        '✓ E-mail de confirmation envoyé à ' + currentOrder.email;
+      document.getElementById('email-status').style.color = 'var(--green)';
+    })
+    .catch(() => {
+      document.getElementById('email-status').textContent =
+        "⚠️ L'e-mail n'a pas pu être envoyé. Vérifiez votre configuration EmailJS.";
+      document.getElementById('email-status').style.color = '#E24B4A';
+    });
+
+  showSuccess();
+}
+
+function sendConfirmationEmail(o) {
+  const lines = [
+    { label: LABELS.small, qty: o.small },
+    { label: LABELS.medium, qty: o.medium },
+    { label: LABELS.large, qty: o.large },
+  ].filter(l => l.qty > 0);
+
+  const details = lines.map(l => `${l.qty}× ${l.label}`).join('\n');
+
+  return emailjs.send('service_xdxd1lw', 'template_5wok52p', {
+    to_email: o.email,
+    to_name: o.prenom + ' ' + o.nom,
+    invoice: o.invoice,
+    details: details,
+    total: o.totalQty + ' plaque' + (o.totalQty > 1 ? 's' : ''),
+    date: o.date,
+  });
+}
+
+function showSuccess() {
+  document.getElementById('form-screen').style.display = 'none';
+  const ss = document.getElementById('success-screen');
+  ss.style.display = 'block';
+
+  document.getElementById('s-name').textContent = currentOrder.prenom + ' ' + currentOrder.nom;
+  document.getElementById('s-invoice').textContent = currentOrder.invoice;
+  document.getElementById('s-email').textContent = currentOrder.email;
+
+  let summaryHtml = '';
+  const lines = [
+    { label: LABELS.small, qty: currentOrder.small },
+    { label: LABELS.medium, qty: currentOrder.medium },
+    { label: LABELS.large, qty: currentOrder.large },
+  ];
+  lines.filter(l => l.qty > 0).forEach(l => {
+    summaryHtml += `<div class="order-line">
+      <span>${l.qty}× ${l.label}</span>
+      <span>${l.qty} plaque${l.qty > 1 ? 's' : ''}</span>
+    </div>`;
+  });
+  summaryHtml += `<div class="order-line total">
+    <span>Total</span><span>${currentOrder.totalQty} plaque${currentOrder.totalQty > 1 ? 's' : ''}</span>
+  </div>`;
+  document.getElementById('s-summary').innerHTML = summaryHtml;
+}
+
+function newOrder() {
+  qtys = { small: 0, medium: 0, large: 0 };
+  ['small', 'medium', 'large'].forEach(t => {
+    document.getElementById('qty-' + t).textContent = '0';
+    document.getElementById('card-' + t).classList.remove('has-qty');
+  });
+  ['prenom','nom','email','tel','adresse','npa','ville'].forEach(f => {
+    document.getElementById('f-' + f).value = '';
+  });
+  updateTotal();
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('form-screen').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function downloadInvoice() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const o = currentOrder;
+  const margin = 25;
+  let y = 30;
+
+  doc.setFillColor(42, 31, 26);
+  doc.rect(0, 0, 210, 45, 'F');
+
+  doc.setTextColor(232, 120, 90);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SAUMON FUMÉ ARTISANAL', margin, 20);
+
+  doc.setFontSize(10);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Édition Pâques 2026', margin, 30);
+
+  doc.setFontSize(11);
+  doc.setTextColor(200, 200, 200);
+  doc.text('FACTURE', 210 - margin - 30, 20);
+  doc.setFontSize(9);
+  doc.text(o.invoice, 210 - margin - 30, 28);
+  doc.text(o.date, 210 - margin - 30, 35);
+
+  y = 65;
+  doc.setTextColor(42, 31, 26);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Facturé à :', margin, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  y += 7;
+  doc.text(o.prenom + ' ' + o.nom, margin, y);
+  if (o.adresse) { y += 6; doc.text(o.adresse, margin, y); }
+  if (o.npa || o.ville) { y += 6; doc.text((o.npa + ' ' + o.ville).trim(), margin, y); }
+  if (o.email) { y += 6; doc.setTextColor(107, 78, 61); doc.text(o.email, margin, y); doc.setTextColor(42, 31, 26); }
+  if (o.tel) { y += 6; doc.text(o.tel, margin, y); }
+
+  y += 18;
+  doc.setFillColor(42, 31, 26);
+  doc.rect(margin, y, 160, 9, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('ARTICLE', margin + 4, y + 6);
+  doc.text('QUANTITÉ', margin + 130, y + 6);
+
+  y += 9;
+  const rows = [
+    { label: 'Saumon Petite (500–700g)', qty: o.small },
+    { label: 'Saumon Moyenne (700–1000g)', qty: o.medium },
+    { label: 'Saumon Grande (1000–1500g)', qty: o.large },
+  ].filter(r => r.qty > 0);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  rows.forEach((r, i) => {
+    doc.setFillColor(i % 2 === 0 ? 253 : 247, i % 2 === 0 ? 248 : 244, i % 2 === 0 ? 244 : 238);
+    doc.rect(margin, y, 160, 9, 'F');
+    doc.setTextColor(42, 31, 26);
+    doc.text(r.label, margin + 4, y + 6);
+    doc.text(String(r.qty) + ' plaque' + (r.qty > 1 ? 's' : ''), margin + 128, y + 6);
+    y += 9;
+  });
+
+  y += 4;
+  doc.setFillColor(232, 120, 90);
+  doc.rect(margin + 80, y, 80, 12, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('TOTAL  ' + o.totalQty + ' plaque' + (o.totalQty > 1 ? 's' : ''), margin + 86, y + 8);
+
+  y += 30;
+  doc.setTextColor(107, 78, 61);
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(9);
+  doc.text('Merci pour votre commande et joyeuses Pâques !', margin, y);
+
+  doc.setFontSize(8);
+  doc.setTextColor(180, 180, 180);
+  doc.text('Document généré le ' + new Date().toLocaleDateString('fr-FR'), margin, 285);
+
+  doc.save('Facture_' + o.invoice + '.pdf');
+}
+
+function ordersToSheet(orders) {
+  const headers = ['Date', 'N° Facture', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Adresse', 'Code Postal', 'Ville', 'Petite (500-700g)', 'Moyenne (700-1000g)', 'Grande (1000-1500g)'];
+  const rows = orders.map(o => [
+    o.date, o.invoice, o.prenom, o.nom, o.email, o.tel, o.adresse, o.npa, o.ville,
+    o.small, o.medium, o.large
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  const colWidths = [24, 16, 14, 14, 26, 24, 26, 12, 16, 10, 10, 10, 10];
+  ws['!cols'] = colWidths.map(w => ({ wch: w }));
+
+  return ws;
+}
+
+function exportCurrentToExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws = ordersToSheet([currentOrder]);
+  XLSX.utils.book_append_sheet(wb, ws, 'Commandes');
+  XLSX.writeFile(wb, 'Commande_' + currentOrder.invoice + '.xlsx');
+}
+
+function exportAllToExcel() {
+  const orders = getOrders();
+  if (!orders.length) {
+    alert('Aucune commande enregistrée.');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const ws = ordersToSheet(orders);
+
+  const totRow = orders.length + 2;
+  const totals = [
+    orders.reduce((s, o) => s + o.small, 0),
+    orders.reduce((s, o) => s + o.medium, 0),
+    orders.reduce((s, o) => s + o.large, 0),
+  ];
+  XLSX.utils.sheet_add_aoa(ws, [['', '', '', '', '', '', '', '', 'TOTAUX', ...totals]], { origin: totRow - 1 });
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Commandes');
+  XLSX.writeFile(wb, 'Commandes_Saumon_Paques_2026.xlsx');
+}
+
+function clearOrders() {
+  if (confirm('Supprimer toutes les commandes locales ?')) {
+    localStorage.removeItem('saumon_orders');
+    alert('Commandes supprimées.');
+  }
+}
+</script>
+
+</body>
+</html>
