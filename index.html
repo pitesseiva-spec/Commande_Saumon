@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Saumon Fumé de Pâques 2026</title>
+<title>Saumon Fumé de Noël 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -465,7 +465,7 @@
           <span style="font-size:2.8rem;">🐟</span>
         </div>
         <div class="product-name">Petite</div>
-        <div class="product-weight">500 – 700 g</div>
+        <div class="product-weight">500 – 750 g</div>
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty('small', -1)">−</button>
           <span class="qty-display" id="qty-small">0</span>
@@ -478,7 +478,7 @@
           <span style="font-size:3.6rem;">🐟</span>
         </div>
         <div class="product-name">Moyenne</div>
-        <div class="product-weight">700 – 1000 g</div>
+        <div class="product-weight">750 – 1000 g</div>
         <div class="qty-control">
           <button class="qty-btn" onclick="changeQty('medium', -1)">−</button>
           <span class="qty-display" id="qty-medium">0</span>
@@ -887,7 +887,7 @@ function downloadInvoice() {
   doc.setFontSize(10);
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'normal');
-  doc.text('Édition Pâques 2026', margin, 30);
+  doc.text('Édition Noël 2026', margin, 30);
 
   doc.setFontSize(11);
   doc.setTextColor(200, 200, 200);
@@ -922,8 +922,8 @@ function downloadInvoice() {
 
   y += 9;
   const rows = [
-    { label: 'Saumon Petite (500–700g)', qty: o.small },
-    { label: 'Saumon Moyenne (700–1000g)', qty: o.medium },
+    { label: 'Saumon Petite (500–750g)', qty: o.small },
+    { label: 'Saumon Moyenne (750–1000g)', qty: o.medium },
     { label: 'Saumon Grande (1000–1500g)', qty: o.large },
   ].filter(r => r.qty > 0);
 
@@ -960,7 +960,7 @@ function downloadInvoice() {
 }
 
 function ordersToSheet(orders) {
-  const headers = ['Date', 'N° Facture', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Adresse', 'Code Postal', 'Ville', 'Petite (500-700g)', 'Moyenne (700-1000g)', 'Grande (1000-1500g)'];
+  const headers = ['Date', 'N° Facture', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Adresse', 'Code Postal', 'Ville', 'Petite (500-750g)', 'Moyenne (750-1000g)', 'Grande (1000-1500g)'];
   const rows = orders.map(o => [
     o.date, o.invoice, o.prenom, o.nom, o.email, o.tel, o.adresse, o.npa, o.ville,
     o.small, o.medium, o.large
