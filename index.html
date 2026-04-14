@@ -440,12 +440,15 @@
 </head>
 <body>
 
-<header>
-  <div class="badge">École Steiner Lausanne</div>
-  <h1>Saumon Fumé<br><em style="font-weight:400;font-style:italic;">d'Exception</em></h1>
-  <p style="max-width:640px;margin:1rem auto 0;font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.72);">
-    Le saumon d'Irlande <em>Salmo Salar</em> que nous vous proposons à Noël et à Pâques, est d'une qualité supérieure. Il est pêché en mer dans des eaux encore non polluées et a une faible teneur en graisse. Il est importé frais, directement en Suisse, par la famille O'Connell qui depuis plusieurs générations s'est spécialisée dans la pêche et le fumage du saumon. Pour la conservation, le fumage de manière traditionnelle est employé. Le temps est laissé au poisson pour qu'il s'imprègne de la fumée du bois de chêne brûlé dans le « kiln », offrant une saveur subtile au saumon, tout en respectant son goût authentique.
-  </p>
+<header style="position:relative;overflow:hidden;">
+  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url('https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=1400&q=80');background-size:cover;background-position:center;opacity:0.25;"></div>
+  <div style="position:relative;z-index:1;">
+    <div class="badge">École Steiner Lausanne</div>
+    <h1>Saumon Fumé<br><em style="font-weight:400;font-style:italic;">d'Exception</em></h1>
+    <p style="max-width:640px;margin:1rem auto 0;font-size:0.95rem;line-height:1.8;color:rgba(255,255,255,0.72);">
+      Le saumon d'Irlande <em>Salmo Salar</em> que nous vous proposons à Noël et à Pâques, est d'une qualité supérieure. Il est pêché en mer dans des eaux encore non polluées et a une faible teneur en graisse. Il est importé frais, directement en Suisse, par la famille O'Connell qui depuis plusieurs générations s'est spécialisée dans la pêche et le fumage du saumon. Pour la conservation, le fumage de manière traditionnelle est employé. Le temps est laissé au poisson pour qu'il s'imprègne de la fumée du bois de chêne brûlé dans le « kiln », offrant une saveur subtile au saumon, tout en respectant son goût authentique.
+    </p>
+  </div>
 </header>
 
 <div class="container">
@@ -458,7 +461,9 @@
     <!-- PRODUCTS -->
     <div class="products-grid">
       <div class="product-card" id="card-small">
-        <span style="font-size:2.8rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div style="padding:0.8rem 0 0.6rem;text-align:center;">
+          <span style="font-size:2.8rem;">🐟</span>
+        </div>
         <div class="product-name">Petite</div>
         <div class="product-weight">500 – 700 g</div>
         <div class="qty-control">
@@ -469,7 +474,9 @@
       </div>
 
       <div class="product-card" id="card-medium">
-        <span style="font-size:3.6rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div style="padding:0.8rem 0 0.6rem;text-align:center;">
+          <span style="font-size:3.6rem;">🐟</span>
+        </div>
         <div class="product-name">Moyenne</div>
         <div class="product-weight">700 – 1000 g</div>
         <div class="qty-control">
@@ -480,7 +487,9 @@
       </div>
 
       <div class="product-card" id="card-large">
-        <span style="font-size:4.6rem;display:block;margin-bottom:0.6rem;">🐟</span>
+        <div style="padding:0.8rem 0 0.6rem;text-align:center;">
+          <span style="font-size:4.6rem;">🐟</span>
+        </div>
         <div class="product-name">Grande</div>
         <div class="product-weight">1000 – 1500 g</div>
         <div class="qty-control">
@@ -582,9 +591,45 @@
     </p>
   </div>
 
-  <!-- ADMIN SECTION — toujours visible -->
-  <div class="admin-section">
-    <h3>⚙️ Espace administrateur</h3>
+  <!-- ADMIN SECTION — protégée par mot de passe -->
+  <div style="text-align:center;margin-top:3rem;padding-bottom:2rem;">
+    <button onclick="showAdminLogin()" style="background:none;border:none;color:var(--border);font-size:0.75rem;cursor:pointer;letter-spacing:1px;">⚙️ admin</button>
+  </div>
+
+  <!-- LOGIN ADMIN -->
+  <div id="admin-login" style="display:none;max-width:320px;margin:0 auto 2rem;background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;color:var(--mid);">⚙️ Espace administrateur</h3>
+    <input type="password" id="admin-pwd" placeholder="Mot de passe" style="width:100%;margin-bottom:0.8rem;" onkeydown="if(event.key==='Enter')checkAdminPwd()"/>
+    <div id="admin-pwd-error" style="color:#E24B4A;font-size:0.82rem;margin-bottom:0.6rem;display:none;">Mot de passe incorrect.</div>
+    <button onclick="checkAdminPwd()" class="submit-btn" style="padding:0.6rem;">Accéder</button>
+  </div>
+
+  <div id="admin-section" style="display:none;" class="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--mid);">⚙️ Espace administrateur</h3>
+      <button onclick="lockAdmin()" style="background:none;border:none;font-size:0.8rem;color:#999;cursor:pointer;">🔒 Verrouiller</button>
+    </div>
+
+    <!-- COMPTEURS -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.2rem;">
+      <div style="background:var(--cream);border-radius:8px;padding:0.8rem;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:1.6rem;font-weight:700;color:var(--salmon-dark);" id="count-total">0</div>
+        <div style="font-size:0.72rem;color:var(--mid);margin-top:2px;">Commandes</div>
+      </div>
+      <div style="background:var(--cream);border-radius:8px;padding:0.8rem;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:1.6rem;font-weight:700;color:var(--salmon-dark);" id="count-small">0</div>
+        <div style="font-size:0.72rem;color:var(--mid);margin-top:2px;">Petites</div>
+      </div>
+      <div style="background:var(--cream);border-radius:8px;padding:0.8rem;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:1.6rem;font-weight:700;color:var(--salmon-dark);" id="count-medium">0</div>
+        <div style="font-size:0.72rem;color:var(--mid);margin-top:2px;">Moyennes</div>
+      </div>
+      <div style="background:var(--cream);border-radius:8px;padding:0.8rem;text-align:center;border:1px solid var(--border);">
+        <div style="font-size:1.6rem;font-weight:700;color:var(--salmon-dark);" id="count-large">0</div>
+        <div style="font-size:0.72rem;color:var(--mid);margin-top:2px;">Grandes</div>
+      </div>
+    </div>
+
     <button class="admin-btn" onclick="exportAllToExcel()">📊 Exporter toutes les commandes (Excel)</button>
     <button class="admin-btn" onclick="clearOrders()">🗑️ Vider les commandes locales</button>
     <br>
@@ -596,6 +641,38 @@
 
 <script>
 emailjs.init('abBulFwuNh5Gbumy0');
+
+function updateCounters() {
+  const orders = getOrders();
+  document.getElementById('count-total').textContent = orders.length;
+  document.getElementById('count-small').textContent = orders.reduce((s, o) => s + (o.small || 0), 0);
+  document.getElementById('count-medium').textContent = orders.reduce((s, o) => s + (o.medium || 0), 0);
+  document.getElementById('count-large').textContent = orders.reduce((s, o) => s + (o.large || 0), 0);
+}
+
+function showAdminLogin() {
+  const login = document.getElementById('admin-login');
+  login.style.display = login.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('admin-pwd-error').style.display = 'none';
+  document.getElementById('admin-pwd').value = '';
+}
+
+function checkAdminPwd() {
+  const pwd = document.getElementById('admin-pwd').value;
+  if (pwd === 'Saumon_AERSL') {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-section').style.display = 'block';
+    updateCounters();
+  } else {
+    document.getElementById('admin-pwd-error').style.display = 'block';
+    document.getElementById('admin-pwd').value = '';
+  }
+}
+
+function lockAdmin() {
+  document.getElementById('admin-section').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'none';
+}
 
 function toggleCommandes() {
   const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
@@ -628,6 +705,7 @@ function applyCommandesState(isOpen) {
 window.addEventListener('DOMContentLoaded', () => {
   const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
   applyCommandesState(isOpen);
+  updateCounters();
 });
 
 const PRICES = { small: 30, medium: 50, large: 70 };
@@ -713,6 +791,7 @@ function submitOrder() {
   };
 
   saveOrder(currentOrder);
+  updateCounters();
 
   sendConfirmationEmail(currentOrder)
     .then(() => {
@@ -926,6 +1005,7 @@ function exportAllToExcel() {
 function clearOrders() {
   if (confirm('Supprimer toutes les commandes locales ?')) {
     localStorage.removeItem('saumon_orders');
+    updateCounters();
     alert('Commandes supprimées.');
   }
 }
