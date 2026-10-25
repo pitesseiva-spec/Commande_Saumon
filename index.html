@@ -556,7 +556,7 @@
 
     <div id="error-msg" style="color:#E24B4A;font-size:0.9rem;margin-bottom:1rem;display:none;"></div>
 
-    <button class="submit-btn" onclick="submitOrder()">Confirmer ma commande</button>
+    <button class="submit-btn" id="submit-btn" onclick="submitOrder()">Confirmer ma commande</button>
     <p class="notice">Vous recevrez une confirmation par e-mail avec le détail de votre commande.</p>
 
   </div><!-- end form-screen -->
@@ -631,10 +631,9 @@
     </div>
 
     <button class="admin-btn" onclick="exportAllToExcel()">📊 Exporter toutes les commandes (Excel)</button>
-    <button class="admin-btn" onclick="clearOrders()">🗑️ Vider les commandes locales</button>
     <br>
     <button id="toggle-btn" class="admin-btn admin-btn-close" onclick="toggleCommandes()">🔒 Fermer les commandes</button>
-    <p style="font-size:0.8rem;color:#999;margin-top:8px;">Les commandes sont stockées localement dans le navigateur.</p>
+    <p style="font-size:0.8rem;color:#999;margin-top:8px;">Les commandes de tous les appareils sont enregistrées dans le Google Sheet.</p>
   </div>
 
 </div>
@@ -642,8 +641,23 @@
 <script>
 emailjs.init('abBulFwuNh5Gbumy0');
 
-function updateCounters() {
-  const orders = getOrders();
+// Adresse du script Google Sheet (se termine par /exec)
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycby3Det3EBwn0P7nLOgyrxW9khY4amBh7i72vqMiIbhfdBfOfjsCD-nL-v6QwXapwgX9Cg/exec';
+let adminKey = null;
+
+function sheetGet(params) {
+  return fetch(SHEET_URL + '?' + new URLSearchParams(params)).then(r => r.json());
+}
+function sheetPost(payload) {
+  return fetch(SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+}
+
+function updateCounters(orders) {
+  orders = orders || [];
   document.getElementById('count-total').textContent = orders.length;
   document.getElementById('count-small').textContent = orders.reduce((s, o) => s + (o.small || 0), 0);
   document.getElementById('count-medium').textContent = orders.reduce((s, o) => s + (o.medium || 0), 0);
@@ -659,29 +673,50 @@ function showAdminLogin() {
 
 function checkAdminPwd() {
   const pwd = document.getElementById('admin-pwd').value;
-  if (pwd === 'Saumon_AERSL') {
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('admin-section').style.display = 'block';
-    updateCounters();
-  } else {
-    document.getElementById('admin-pwd-error').style.display = 'block';
-    document.getElementById('admin-pwd').value = '';
-  }
+  const errEl = document.getElementById('admin-pwd-error');
+  errEl.style.display = 'none';
+  sheetGet({ action: 'orders', key: pwd })
+    .then(res => {
+      if (!res.ok) {
+        errEl.textContent = 'Mot de passe incorrect.';
+        errEl.style.display = 'block';
+        document.getElementById('admin-pwd').value = '';
+        return;
+      }
+      adminKey = pwd;
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-section').style.display = 'block';
+      updateCounters(res.orders);
+      applyCommandesState(res.open);
+    })
+    .catch(() => {
+      errEl.textContent = 'Connexion au Google Sheet impossible.';
+      errEl.style.display = 'block';
+    });
 }
 
 function lockAdmin() {
+  adminKey = null;
   document.getElementById('admin-section').style.display = 'none';
   document.getElementById('admin-login').style.display = 'none';
 }
 
+let commandesOuvertes = true;
+
 function toggleCommandes() {
-  const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
-  const nowOpen = !isOpen;
-  localStorage.setItem('commandes_ouvertes', nowOpen ? 'true' : 'false');
-  applyCommandesState(nowOpen);
+  const btn = document.getElementById('toggle-btn');
+  btn.disabled = true;
+  sheetPost({ action: 'setOpen', key: adminKey, open: !commandesOuvertes })
+    .then(res => {
+      if (res.ok) applyCommandesState(res.open);
+      else alert("La modification n'a pas pu être enregistrée.");
+    })
+    .catch(() => alert('Connexion au Google Sheet impossible.'))
+    .finally(() => { btn.disabled = false; });
 }
 
 function applyCommandesState(isOpen) {
+  commandesOuvertes = isOpen;
   const formScreen = document.getElementById('form-screen');
   const closedScreen = document.getElementById('closed-screen');
   const successScreen = document.getElementById('success-screen');
@@ -703,9 +738,8 @@ function applyCommandesState(isOpen) {
 
 // Init on page load
 window.addEventListener('DOMContentLoaded', () => {
-  const isOpen = localStorage.getItem('commandes_ouvertes') !== 'false';
-  applyCommandesState(isOpen);
-  updateCounters();
+  applyCommandesState(true);
+  sheetGet({}).then(res => { if (res.ok) applyCommandesState(res.open); }).catch(() => {});
 });
 
 const PRICES = { small: 30, medium: 50, large: 70 };
@@ -790,8 +824,35 @@ function submitOrder() {
     totalQty: total
   };
 
-  saveOrder(currentOrder);
-  updateCounters();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement…';
+
+  sheetPost({ action: 'order', order: currentOrder })
+    .then(res => {
+      if (res.ok) {
+        saveOrder(currentOrder);
+        finishOrder();
+      } else if (res.error === 'closed') {
+        applyCommandesState(false);
+      } else {
+        errorEl.textContent = "La commande n'a pas pu être enregistrée. Merci de réessayer.";
+        errorEl.style.display = 'block';
+      }
+    })
+    .catch(() => {
+      errorEl.textContent = "La commande n'a pas pu être enregistrée (problème de connexion). Merci de réessayer.";
+      errorEl.style.display = 'block';
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = 'Confirmer ma commande';
+    });
+}
+
+function finishOrder() {
+  document.getElementById('email-status').textContent = "⏳ Envoi de l'e-mail de confirmation en cours…";
+  document.getElementById('email-status').style.color = 'var(--mid)';
 
   sendConfirmationEmail(currentOrder)
     .then(() => {
@@ -982,7 +1043,16 @@ function exportCurrentToExcel() {
 }
 
 function exportAllToExcel() {
-  const orders = getOrders();
+  sheetGet({ action: 'orders', key: adminKey })
+    .then(res => {
+      if (!res.ok) { alert('Accès refusé.'); return; }
+      updateCounters(res.orders);
+      buildExcel(res.orders);
+    })
+    .catch(() => alert('Connexion au Google Sheet impossible.'));
+}
+
+function buildExcel(orders) {
   if (!orders.length) {
     alert('Aucune commande enregistrée.');
     return;
@@ -999,16 +1069,9 @@ function exportAllToExcel() {
   XLSX.utils.sheet_add_aoa(ws, [['', '', '', '', '', '', '', '', 'TOTAUX', ...totals]], { origin: totRow - 1 });
 
   XLSX.utils.book_append_sheet(wb, ws, 'Commandes');
-  XLSX.writeFile(wb, 'Commandes_Saumon_Paques_2026.xlsx');
+  XLSX.writeFile(wb, 'Commandes_Saumon_Noel_2026.xlsx');
 }
 
-function clearOrders() {
-  if (confirm('Supprimer toutes les commandes locales ?')) {
-    localStorage.removeItem('saumon_orders');
-    updateCounters();
-    alert('Commandes supprimées.');
-  }
-}
 </script>
 
 </body>
