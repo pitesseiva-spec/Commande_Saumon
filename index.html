@@ -530,7 +530,7 @@
           <input type="email" id="f-email" placeholder="marie@exemple.ch" />
         </div>
         <div class="field">
-          <label>Téléphone</label>
+          <label>Téléphone *</label>
           <input type="tel" id="f-tel" placeholder="079 123 45 67" />
         </div>
       </div>
@@ -575,7 +575,7 @@
     </p>
 
     <div class="success-actions">
-      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la confirmation en PDF</button>
+      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la facture PDF</button>
       <button class="action-btn btn-excel" onclick="exportCurrentToExcel()">📊 Exporter Excel</button>
       <button class="action-btn btn-new" onclick="newOrder()">+ Nouvelle commande</button>
     </div>
@@ -802,6 +802,7 @@ function submitOrder() {
   if (!prenom) errors.push('le prénom');
   if (!nom) errors.push('le nom');
   if (!email || !email.includes('@')) errors.push('un e-mail valide');
+  if (tel.replace(/\D/g, '').length < 9) errors.push('un numéro de téléphone valide');
   if (total === 0) errors.push('au moins un article');
 
   if (errors.length) {
