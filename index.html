@@ -593,8 +593,7 @@
     </p>
 
     <div class="success-actions">
-      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la facture PDF</button>
-      <button class="action-btn btn-excel" onclick="exportCurrentToExcel()">📊 Exporter Excel</button>
+      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la commande PDF</button>
       <button class="action-btn btn-new" onclick="newOrder()">+ Nouvelle commande</button>
     </div>
   </div>
@@ -761,7 +760,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const PRICES = { small: 30, medium: 50, large: 70 };
-const LABELS = { small: 'Petite (500-700g)', medium: 'Moyenne (700-1000g)', large: 'Grande (1000-1500g)' };
+const LABELS = { small: 'Petite (500-750g)', medium: 'Moyenne (750-1000g)', large: 'Grande (1000-1500g)' };
 let qtys = { small: 0, medium: 0, large: 0 };
 let currentOrder = null;
 
@@ -870,6 +869,7 @@ function submitOrder() {
 }
 
 function finishOrder() {
+  showSuccess();
   document.getElementById('email-status').textContent = "⏳ Envoi de l'e-mail de confirmation en cours…";
   document.getElementById('email-status').style.color = 'var(--mid)';
 
@@ -884,8 +884,6 @@ function finishOrder() {
         "⚠️ L'e-mail n'a pas pu être envoyé. Vérifiez votre configuration EmailJS.";
       document.getElementById('email-status').style.color = '#E24B4A';
     });
-
-  showSuccess();
 }
 
 function sendConfirmationEmail(o) {
@@ -914,7 +912,6 @@ function showSuccess() {
 
   document.getElementById('s-name').textContent = currentOrder.prenom + ' ' + currentOrder.nom;
   document.getElementById('s-invoice').textContent = currentOrder.invoice;
-  document.getElementById('s-email').textContent = currentOrder.email;
 
   let summaryHtml = '';
   const lines = [
