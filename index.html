@@ -575,7 +575,7 @@
     </p>
 
     <div class="success-actions">
-      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la commande en PDF</button>
+      <button class="action-btn btn-pdf" onclick="downloadInvoice()">📄 Télécharger la facture PDF</button>
       <button class="action-btn btn-excel" onclick="exportCurrentToExcel()">📊 Exporter Excel</button>
       <button class="action-btn btn-new" onclick="newOrder()">+ Nouvelle commande</button>
     </div>
@@ -1012,7 +1012,7 @@ function downloadInvoice() {
   doc.setTextColor(107, 78, 61);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(9);
-  doc.text('Merci pour votre commande et joyeuses Pâques !', margin, y);
+  doc.text('Merci pour votre commande !', margin, y);
 
   doc.setFontSize(8);
   doc.setTextColor(180, 180, 180);
